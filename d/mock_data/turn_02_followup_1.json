@@ -1,0 +1,38 @@
+{
+  "request": {
+    "contract_version": "1.0",
+    "request_id": "req_0002",
+    "session_id": "3f2a7c1e-9b4d-4c6a-8e21-7d5f0a9b2c34",
+    "action": "submit_answer",
+    "state": "interviewing",
+    "answer": {
+      "turn_id": "q_001",
+      "text": "我们团队做了这个云台，用了 STM32 和 FreeRTOS，效果挺好的。",
+      "duration_ms": 18000,
+      "asr_confidence": 0.93
+    },
+    "client": {"source": "web", "user_confirmed": true}
+  },
+  "response": {
+    "contract_version": "1.0",
+    "request_id": "req_0002",
+    "session_id": "3f2a7c1e-9b4d-4c6a-8e21-7d5f0a9b2c34",
+    "state": "interviewing",
+    "type": "question",
+    "question": {
+      "turn_id": "q_002",
+      "kind": "followup",
+      "text": "你刚才说“我们团队”，其中哪部分是你亲自做的？",
+      "tts_text": "你刚才说“我们团队”，哪部分是你亲自做的？",
+      "is_followup": true,
+      "parent_turn_id": "q_001",
+      "followup_reason": "ownership",
+      "target_rule": "P01",
+      "expected_focus": "个人贡献边界",
+      "max_answer_seconds": 90
+    },
+    "feedback": null,
+    "error": null,
+    "meta": {"turn_index": 2, "max_turns": 6, "elapsed_seconds": 22}
+  }
+}

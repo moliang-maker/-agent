@@ -1,0 +1,45 @@
+{
+  "request": {
+    "contract_version": "1.0",
+    "request_id": "req_0001",
+    "session_id": "3f2a7c1e-9b4d-4c6a-8e21-7d5f0a9b2c34",
+    "action": "start_interview",
+    "state": "project_selected",
+    "project": {
+      "name": "基于STM32的云台控制系统",
+      "description": "为机器视觉实验做二轴云台，要求画面稳定、上位机可调参；负责电机控制、CAN 通信和 PID 整定。",
+      "role": "嵌入式软件",
+      "tech_stack": ["STM32F407", "FreeRTOS", "CAN", "PID"],
+      "responsibilities": ["电机控制", "CAN通信", "PID整定"],
+      "metrics": [
+        {"name": "超调", "value": "8", "unit": "%"},
+        {"name": "控制周期", "value": "1", "unit": "ms"}
+      ],
+      "resume_evidence": "负责云台电机控制与 CAN 通信，PID 整定后超调降至 8%。"
+    },
+    "answer": null,
+    "client": {"source": "web", "user_confirmed": true}
+  },
+  "response": {
+    "contract_version": "1.0",
+    "request_id": "req_0001",
+    "session_id": "3f2a7c1e-9b4d-4c6a-8e21-7d5f0a9b2c34",
+    "state": "interviewing",
+    "type": "question",
+    "question": {
+      "turn_id": "q_001",
+      "kind": "main",
+      "text": "先用一分钟介绍这个项目，以及你个人负责的部分。",
+      "tts_text": "先用一分钟介绍这个项目，以及你个人负责的部分。",
+      "is_followup": false,
+      "parent_turn_id": null,
+      "followup_reason": null,
+      "target_rule": null,
+      "expected_focus": "项目背景与个人贡献",
+      "max_answer_seconds": 90
+    },
+    "feedback": null,
+    "error": null,
+    "meta": {"turn_index": 1, "max_turns": 6, "elapsed_seconds": 0}
+  }
+}

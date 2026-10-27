@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "D-AgentRequest",
+  "description": "A 调用 D 面试 Agent 的请求。contract_version 1.0。",
+  "type": "object",
+  "required": ["contract_version", "request_id", "session_id", "action", "state"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "request_id": {"type": "string", "pattern": "^req_"},
+    "session_id": {"type": "string", "minLength": 8, "description": "A 生成；建议 crypto.randomUUID()"},
+    "action": {
+      "enum": ["start_interview", "submit_answer", "end_interview", "retry", "complete_session"]
+    },
+    "state": {
+      "enum": ["waiting_resume", "project_selected", "interviewing", "reviewing", "completed", "error"]
+    },
+    "project": {"$ref": "#/definitions/project"},
+    "answer": {
+      "oneOf": [
+        {"$ref": "#/definitions/answer"},
+        {"type": "null"}
+      ]
+    },
+    "retry": {
+      "oneOf": [
+        {"$ref": "#/definitions/retry"},
+        {"type": "null"}
+      ]
+    },
+    "client": {
+      "type": "object",
+      "properties": {
+        "source": {"const": "web"},
+        "user_confirmed": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "start_interview"}}},
+      "then": {"required": ["project"]}
+    },
+    {
+      "if": {"properties": {"action": {"const": "submit_answer"}}},
+      "then": {"required": ["answer"]}
+    },
+    {
+      "if": {"properties": {"action": {"const": "retry"}}},
+      "then": {"required": ["retry"]}
+    }
+  ],
+  "additionalProperties": true,
+  "definitions": {
+    "project": {
+      "type": "object",
+      "required": ["name", "description", "role"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "tech_stack": {"type": "array", "items": {"type": "string"}},
+        "responsibilities": {"type": "array", "items": {"type": "string"}},
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "value"],
+            "properties": {
+              "name": {"type": "string"},
+              "value": {"type": "string"},
+              "unit": {"type": "string"}
+            }
+          }
+        },
+        "resume_evidence": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "answer": {
+      "type": "object",
+      "required": ["turn_id", "text"],
+      "properties": {
+        "turn_id": {"type": "string", "pattern": "^q_"},
+        "text": {"type": "string", "minLength": 1},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "asr_confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": true
+    },
+    "retry": {
+      "type": "object",
+      "required": ["question_id"],
+      "properties": {"question_id": {"type": "string", "pattern": "^q_"}},
+      "additionalProperties": true
+    }
+  }
+}

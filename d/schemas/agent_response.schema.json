@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "D-AgentResponse",
+  "description": "D 返回给 A 的面试响应。type 取 question / feedback / error。",
+  "type": "object",
+  "required": ["contract_version", "request_id", "session_id", "state", "type", "question", "feedback", "error", "meta"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "request_id": {"type": "string", "pattern": "^req_"},
+    "session_id": {"type": "string", "minLength": 8, "description": "与请求一致；A 生成"},
+    "state": {"enum": ["interviewing", "reviewing", "completed", "error"]},
+    "type": {"enum": ["question", "feedback", "error"]},
+    "question": {
+      "oneOf": [
+        {"$ref": "#/definitions/question"},
+        {"type": "null"}
+      ]
+    },
+    "feedback": {
+      "oneOf": [
+        {"$ref": "#/definitions/feedback"},
+        {"type": "null"}
+      ]
+    },
+    "error": {
+      "oneOf": [
+        {"$ref": "#/definitions/error"},
+        {"type": "null"}
+      ]
+    },
+    "meta": {
+      "type": "object",
+      "required": ["turn_index", "max_turns"],
+      "properties": {
+        "turn_index": {"type": "integer", "minimum": 1},
+        "max_turns": {"type": "integer", "minimum": 1},
+        "elapsed_seconds": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"type": {"const": "question"}}},
+      "then": {
+        "properties": {
+          "state": {"const": "interviewing"},
+          "question": {"$ref": "#/definitions/question"},
+          "feedback": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"type": {"const": "feedback"}}},
+      "then": {
+        "properties": {
+          "state": {"const": "reviewing"},
+          "feedback": {"$ref": "#/definitions/feedback"},
+          "question": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"type": {"const": "error"}}},
+      "then": {
+        "properties": {
+          "state": {"const": "error"},
+          "error": {"$ref": "#/definitions/error"}
+        }
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "definitions": {
+    "question": {
+      "type": "object",
+      "required": ["turn_id", "kind", "text", "tts_text", "is_followup"],
+      "properties": {
+        "turn_id": {"type": "string", "pattern": "^q_"},
+        "kind": {"enum": ["main", "followup"]},
+        "text": {"type": "string", "minLength": 1},
+        "tts_text": {"type": "string", "minLength": 1, "maxLength": 45},
+        "is_followup": {"type": "boolean"},
+        "parent_turn_id": {"type": ["string", "null"]},
+        "followup_reason": {"type": ["string", "null"]},
+        "target_rule": {"type": ["string", "null"]},
+        "expected_focus": {"type": "string"},
+        "max_answer_seconds": {"type": "integer", "minimum": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"is_followup": {"const": true}}},
+          "then": {
+            "required": ["parent_turn_id", "followup_reason", "target_rule"]
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "feedback": {
+      "type": "object",
+      "required": ["mode", "summary", "items", "next_action", "quotes_verified"],
+      "properties": {
+        "mode": {"enum": ["full", "degraded"]},
+        "summary": {"type": "string", "minLength": 1},
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["item_id", "turn_id", "quote", "issue_type", "issue", "suggestion", "severity"],
+            "properties": {
+              "item_id": {"type": "string"},
+              "turn_id": {"type": "string", "pattern": "^q_"},
+              "quote": {"type": "string", "minLength": 2},
+              "issue_type": {"type": "string"},
+              "issue": {"type": "string"},
+              "suggestion": {"type": "string"},
+              "severity": {"enum": ["P0", "P1", "P2"]}
+            },
+            "additionalProperties": true
+          }
+        },
+        "strengths": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["quote", "point"],
+            "properties": {
+              "quote": {"type": "string"},
+              "point": {"type": "string"}
+            }
+          }
+        },
+        "retry_plan": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["question_id", "instruction"],
+              "properties": {
+                "question_id": {"type": "string", "pattern": "^q_"},
+                "instruction": {"type": "string"}
+              }
+            },
+            {"type": "null"}
+          ]
+        },
+        "next_action": {"type": "string"},
+        "quotes_verified": {"type": "boolean"},
+        "notice": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["quote", "issue", "suggestion", "severity"],
+              "properties": {
+                "quote": {"type": "string"},
+                "issue": {"type": "string"},
+                "suggestion": {"type": "string"},
+                "severity": {"const": "info"}
+              },
+              "additionalProperties": true
+            },
+            {"type": "null"}
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "recoverable"],
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"},
+        "recoverable": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  }
+}

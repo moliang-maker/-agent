@@ -1,0 +1,12 @@
+{
+  "name": "基于STM32的云台控制系统",
+  "description": "为机器视觉实验做二轴云台，要求画面稳定、上位机可调参；负责电机控制、CAN 通信和 PID 整定。",
+  "role": "嵌入式软件",
+  "tech_stack": ["STM32F407", "FreeRTOS", "CAN", "PID"],
+  "responsibilities": ["电机控制", "CAN通信", "PID整定"],
+  "metrics": [
+    {"name": "超调", "value": "8", "unit": "%"},
+    {"name": "控制周期", "value": "1", "unit": "ms"}
+  ],
+  "resume_evidence": "负责云台电机控制与 CAN 通信，PID 整定后超调降至 8%。"
+}
