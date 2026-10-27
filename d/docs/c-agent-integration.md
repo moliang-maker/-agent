@@ -35,6 +35,8 @@ GET /api/agent/state?session_id=<session_id>
   "session_id": "3f2a7c1e-9b4d-4c6a-8e21-7d5f0a9b2c34",
   "state": "interviewing",
   "turn_index": 2,
+  "attempt": 1,
+  "round_answers": 1,
   "last_question_id": "q_002",
   "reminder_allowed": true,
   "reason": "interviewing"
@@ -47,6 +49,7 @@ GET /api/agent/state?session_id=<session_id>
 - `state` 缺失/请求失败 → C 按 `false` 处理（安全默认：不提醒）。
 - C 只做**视觉/灯光/震动**提醒，不要用语音打断；D 不读取 C 的姿态数据，也不判断“紧张/情绪”。
 - 建议 C 以 300–500ms 轮询一次，不要每帧请求。
+- `retry` 后 `state` 仍是 `interviewing`，用 `attempt`（第几轮）和 `round_answers`（本轮回答数）区分重练；C 不应只靠 `state` 判断。
 
 ## 4. C 的接入流程
 
@@ -113,9 +116,10 @@ curl -s -X POST http://127.0.0.1:8000/api/agent \
 - 第 1 次回答 → `q_002` 追问（ownership）。
 - 第 2 次回答 → `q_003` 追问（data）。
 - 第 3 次回答 → `feedback` full。
-- `end_interview` → 回答不足 3 条时返回 degraded + `notice`。
-- `retry` → 回到 `q_001`。
+- `end_interview` → 本轮回答不足 3 条时返回 degraded + `notice`。
+- `retry`（仅 `reviewing`）→ `attempt+1`、`round_answers=0`、回到 `q_001`；上一轮回答不再计入本轮。
 - `complete_session` → `state=completed`。
+- 同一 `(session_id, request_id)` 重复发送 → 直接重放第一次响应，不会重复推进。
 
 Mock 的文本是固定的，C **只依赖字段和状态**，不要依赖具体问题内容；真实 Agent 会替换这些文本，契约不变。
 

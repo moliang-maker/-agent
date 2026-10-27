@@ -37,11 +37,17 @@ FEEDBACK_DEGRADED = load("feedback_degraded.json")
 
 SESSIONS: dict[str, dict[str, Any]] = {}
 LOCK = threading.Lock()
+# (session_id, request_id) -> (http_status, response)。同请求重放同一结果，避免重复副作用。
+IDEMPOTENCY: dict[tuple[str, str], tuple[int, dict[str, Any]]] = {}
+REQUEST_LOCK = threading.RLock()
+MAX_CACHE = 500
 
 
 def reset_sessions() -> None:
     with LOCK:
         SESSIONS.clear()
+    with REQUEST_LOCK:
+        IDEMPOTENCY.clear()
 
 
 def _base_response(req: dict[str, Any], state: str, rtype: str) -> dict[str, Any]:
@@ -87,7 +93,7 @@ def _valid_project(project: dict[str, Any] | None) -> bool:
     )
 
 
-def handle(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+def _handle_uncached(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     sid = req.get("session_id")
     action = req.get("action")
     if not sid or not isinstance(sid, str):
@@ -109,6 +115,8 @@ def handle(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
                 "turn": 1,
                 "last_question_id": "q_001",
                 "answers": [],
+                "attempt": 1,
+                "history": [],
             }
             SESSIONS[sid] = session
             return 200, _question_from(TURN_MAIN["response"], req, session)
@@ -140,6 +148,13 @@ def handle(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
             return 200, _feedback_from(template, req, session)
 
         if action == "retry":
+            if session["state"] != "reviewing":
+                return 409, error(req, "E_STATE_CONFLICT", "只有 reviewing 才能重练", session["state"])
+            session.setdefault("history", []).append(
+                {"attempt": session.get("attempt", 1), "answers": list(session["answers"])}
+            )
+            session["attempt"] = int(session.get("attempt", 1)) + 1
+            session["answers"] = []
             session["state"] = "interviewing"
             session["turn"] = 1
             session["last_question_id"] = "q_001"
@@ -169,6 +184,24 @@ def handle(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
         return 400, error(req, "E_UNSUPPORTED", f"未知 action: {action}", session["state"])
 
 
+def handle(req: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    """幂等入口：同一 (session_id, request_id) 只执行一次，重放同一响应。"""
+    rid = req.get("request_id")
+    sid = req.get("session_id")
+    if not isinstance(rid, str) or not rid.strip():
+        return 400, error(req, "E_BAD_REQUEST", "request_id 缺失")
+    key = (str(sid or ""), rid)
+    with REQUEST_LOCK:
+        if key in IDEMPOTENCY:
+            status, payload = IDEMPOTENCY[key]
+            return status, copy.deepcopy(payload)
+        status, payload = _handle_uncached(req)
+        if len(IDEMPOTENCY) >= MAX_CACHE:
+            IDEMPOTENCY.clear()
+        IDEMPOTENCY[key] = (status, copy.deepcopy(payload))
+        return status, payload
+
+
 def state_payload(session_id: str) -> tuple[int, dict[str, Any]]:
     with LOCK:
         session = SESSIONS.get(session_id)
@@ -179,6 +212,8 @@ def state_payload(session_id: str) -> tuple[int, dict[str, Any]]:
         "session_id": session_id,
         "state": session["state"],
         "turn_index": session["turn"],
+        "attempt": session.get("attempt", 1),
+        "round_answers": len(session.get("answers", [])),
         "last_question_id": session.get("last_question_id"),
         "reminder_allowed": allowed,
         "reason": "interviewing" if allowed else f"state={session['state']}",

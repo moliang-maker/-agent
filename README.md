@@ -30,6 +30,14 @@ GET  /health                        健康检查
 
 建议 C 每 300–500ms 查一次，不要每帧请求。C 只做视觉/灯光/震动提醒，不要用语音打断；D 不读取 C 的姿态数据。
 
+## 2026-10-27 联调修复
+
+- 同一 `(session_id, request_id)` 重发会重放首次响应，不再重复推进；重复 `start_interview` 不会 409。
+- `retry` 只允许在 `reviewing`；开启新 attempt、清空本轮回答、上一轮进入 history。重练后不回答直接结束 → degraded。
+- `/api/agent/state` 新增 `attempt`、`round_answers`，C 不再只能靠 `state` 区分重练。
+
+详见 `d/docs/integration-fixes-20261027.md`。
+
 ## 验证
 
 ```bash
@@ -41,6 +49,8 @@ python d/test_agent_server.py
 ```text
 AGENT SERVER OK
 q_001 -> q_002 -> q_003 -> feedback
+idempotency: start/answer replay OK
+retry: attempt=2 round_answers=0 end_mode=degraded
 reminder_allowed: interviewing=True reviewing=False
 ```
 

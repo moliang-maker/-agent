@@ -316,6 +316,8 @@ degraded 示例：
 7. 第一版不使用 C 的视觉数据；A 不需要传摄像头/姿态字段。
 8. 重试：同一 `request_id` 重发必须幂等；A 超时后最多重试 1 次。
 9. 契约版本变更：新增可选字段升 `1.1`；破坏性变更升 `2.0`，提前通知 A。
+10. 幂等实现：同一 `(session_id, request_id)` 只执行一次，重放相同的 HTTP 状态和响应；重复 `start_interview` 不应返回 409。
+11. 重练轮次：只有 `reviewing` 可 `retry`；`retry` 开启新 attempt，清空本轮 `answers`，上一轮进入 `history`；`state` 仍是 `interviewing`，用 `/api/agent/state` 的 `attempt`、`round_answers` 区分轮次。
 
 ---
 

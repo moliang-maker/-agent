@@ -144,6 +144,8 @@ export async function callAgent(req, { timeoutMs = 10000 } = {}) {
 - 普通错误 Toast：2200ms。
 - 超时：10 秒；文案“Agent 请求超时，请稍后重试”。
 - `error.recoverable=true` 时用同一个 `request_id` 重试一次；仍失败再提示用户。
+- 同一 `request_id` 重发会重放第一次的结果；不要换新 `request_id` 重试，否则会重复推进。
+- `retry` 只从 `reviewing` 发起；D 会开新 attempt 并清空本轮回答，A 也要清空本轮输入。
 
 ## 5. 复盘渲染
 

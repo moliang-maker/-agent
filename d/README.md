@@ -14,6 +14,7 @@
 | `d/test_agent_flow.py` | 纯标准库验证脚本，模拟 A→D→A 并校验契约 |
 | `d/agent_server.py` | 本地 Mock HTTP Agent（`POST /api/agent` + `/api/agent/state`） |
 | `d/docs/c-agent-integration.md` | C 接入说明：提醒仲裁、curl/Python 示例 |
+| `d/docs/integration-fixes-20261027.md` | 联调发现的幂等/重练问题及修复记录 |
 | `d/test_agent_server.py` | 启动本地服务并走 HTTP 流程的验证脚本 |
 
 ## 运行
