@@ -60,6 +60,9 @@ reminder_allowed: interviewing=True reviewing=False
 - `d/docs/api-contract.md`：完整请求/响应契约。
 - `d/schemas/`：机器可读 JSON Schema。
 - `d/mock_data/`：主问、两次追问、full/degraded 复盘。
+- `d/platform/ljyd-agent-profile.md`：灵机平台 Agent 字段配置与边界。
+- `d/platform/ljyd-role-definition.txt`：可直接粘贴到平台的角色定义。
+- `d/platform/ljyd-test-cases.md`：平台调试预览语料。
 
 ## 边界
 

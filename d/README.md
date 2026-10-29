@@ -16,6 +16,9 @@
 | `d/docs/c-agent-integration.md` | C 接入说明：提醒仲裁、curl/Python 示例 |
 | `d/docs/integration-fixes-20261027.md` | 联调发现的幂等/重练问题及修复记录 |
 | `d/test_agent_server.py` | 启动本地服务并走 HTTP 流程的验证脚本 |
+| `d/platform/ljyd-agent-profile.md` | 灵机平台 Agent 字段配置、创建步骤与边界 |
+| `d/platform/ljyd-role-definition.txt` | 可直接粘贴到平台的角色定义 |
+| `d/platform/ljyd-test-cases.md` | 平台调试预览的 6 条语料 |
 
 ## 运行
 
