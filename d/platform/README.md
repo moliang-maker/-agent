@@ -9,6 +9,8 @@
 | `ljyd-agent-profile.md` | 平台字段怎么填、创建步骤、与 D 接口的关系 |
 | `ljyd-role-definition.txt` | 直接粘贴到平台“角色定义”的纯文本 |
 | `ljyd-test-cases.md` | 平台调试预览用的 6 条语料和通过标准 |
+| `ljyd-network-guide-1080.png` | 平台“配网图片”上传用，1080×1080 PNG |
+| `ljyd-network-instructions.txt` | 平台“配网说明”粘贴用，80 字 |
 
 ## 关键结论
 
