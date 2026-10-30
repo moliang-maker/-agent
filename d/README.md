@@ -19,6 +19,7 @@
 | `d/platform/ljyd-agent-profile.md` | 灵机平台 Agent 字段配置、创建步骤与边界 |
 | `d/platform/ljyd-role-definition.txt` | 可直接粘贴到平台的角色定义 |
 | `d/platform/ljyd-test-cases.md` | 平台调试预览的 6 条语料 |
+| `d/docs/tencent-agent-web-api.md` | 腾讯 ADP/CloudBase 网页调用核对：端点、鉴权、cURL、SSE、CORS |
 
 ## 运行
 
